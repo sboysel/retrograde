@@ -8,6 +8,8 @@ repo = Repo(
     url = "https://github.com/sboysel/awesome-oss-research-data"
 )
 
+print(repo.path)
+
 assert repo.clone()
 print(repo.status())
 print(repo.current_branch())
