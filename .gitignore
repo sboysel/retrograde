@@ -1,5 +1,5 @@
-temp
 dist
-src/pystrata/__pycache__
 tests/__pycache__
 demo
+src/retrograde/__pycache__
+.vscode

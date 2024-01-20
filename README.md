@@ -1,7 +1,7 @@
-# pystrata
+# retrograde
 
-[![PyPI - Version](https://img.shields.io/pypi/v/pystrata.svg)](https://pypi.org/project/pystrata)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pystrata.svg)](https://pypi.org/project/pystrata)
+[![PyPI - Version](https://img.shields.io/pypi/v/retrograde.svg)](https://pypi.org/project/retrograde)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/retrograde.svg)](https://pypi.org/project/retrograde)
 
 -----
 
@@ -13,9 +13,9 @@
 ## Installation
 
 ```console
-pip install pystrata
+pip install retrograde
 ```
 
 ## License
 
-`pystrata` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`retrograde` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

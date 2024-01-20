@@ -1,6 +1,6 @@
 import pytest
 from tempfile import TemporaryDirectory
-from pystrata.repo import Repo
+from retrograde.repo import Repo
 
 @pytest.fixture(scope="session", autouse=True)
 def test_repo_clone():

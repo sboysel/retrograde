@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pystrata"
+name = "retrograde"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
@@ -27,12 +27,12 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Documentation = "https://github.com/unknown/pystrata#readme"
-Issues = "https://github.com/unknown/pystrata/issues"
-Source = "https://github.com/unknown/pystrata"
+Documentation = "https://github.com/unknown/retrograde#readme"
+Issues = "https://github.com/unknown/retrograde/issues"
+Source = "https://github.com/unknown/retrograde"
 
 [tool.hatch.version]
-path = "src/pystrata/__about__.py"
+path = "src/retrograde/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -59,19 +59,19 @@ dependencies = [
   "mypy>=1.0.0",
 ]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/pystrata tests}"
+check = "mypy --install-types --non-interactive {args:src/retrograde tests}"
 
 [tool.coverage.run]
-source_pkgs = ["pystrata", "tests"]
+source_pkgs = ["retrograde", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/pystrata/__about__.py",
+  "src/retrograde/__about__.py",
 ]
 
 [tool.coverage.paths]
-pystrata = ["src/pystrata", "*/pystrata/src/pystrata"]
-tests = ["tests", "*/pystrata/tests"]
+retrograde = ["src/retrograde", "*/retrograde/src/retrograde"]
+tests = ["tests", "*/retrograde/tests"]
 
 [tool.coverage.report]
 exclude_lines = [

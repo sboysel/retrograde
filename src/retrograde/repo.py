@@ -32,7 +32,7 @@ class Repo:
     
     def _temp_branch(self):
         """run `git checkout -b [branch]`"""
-        branch = "pystrata" + rand_string(10)
+        branch = "retrograde" + rand_string(10)
         _git(self.path, subcmd=["checkout", "-b", branch])
         return branch
 
@@ -75,7 +75,6 @@ def _clone(url, path):
             _git(path, cmd, subcmd)
         except BaseException as e:
             raise e
-        
     return True
 
 # === utilities
