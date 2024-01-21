@@ -3,3 +3,4 @@ tests/__pycache__
 demo
 src/retrograde/__pycache__
 .vscode
+.coverage*

@@ -1,6 +1,11 @@
+# SPDX-FileCopyrightText: 2024-present Sam Boysel <sboysel@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+import datetime
 import secrets
 import string
 import subprocess
+import time
 from pathlib import Path
 
 # === Repo
@@ -27,13 +32,13 @@ class Repo:
 
     def _checkout_branch(self, branch):
         """run `git checkout [branch]`"""
-        _git(self.path, subcmd=["checkout", branch])
+        _ = _git(self.path, subcmd=["checkout", "--quiet", branch])
         return branch
     
     def _temp_branch(self):
         """run `git checkout -b [branch]`"""
-        branch = "retrograde" + rand_string(10)
-        _git(self.path, subcmd=["checkout", "-b", branch])
+        branch = "retrograde" + _rand_string(10)
+        _ = _git(self.path, subcmd=["checkout", "--quiet", "-b", branch])
         return branch
 
     def _commits(self):
@@ -41,12 +46,17 @@ class Repo:
         out = _git(self.path, subcmd=["log", "--format=%h"])
         return out.splitlines()
     
+    def _commits_with_timestamps(self):
+        """return list of (commits hashes, timestamp) tuples"""
+        out = _git(self.path, subcmd=["log", "--format=%h,%at"])
+        return [tuple(x.split(",")) for x in out.splitlines()]
+    
     def _reset(self, commit):
         out = _git(self.path, subcmd=["reset", "--hard", commit])
         return out
     
     def _rebase(self, branch):
-        out = _git(self.path, subcmd=["rebase", branch])
+        out = _git(self.path, subcmd=["rebase", "--quiet", branch])
         return out
         
 
@@ -60,16 +70,16 @@ def _git(path, cmd=None, subcmd=[None]):
     return out
 
 # === clone
-def is_cloned(url, path):
+def _is_cloned(url, path):
     is_cloned = False
-    if is_git_repo(path):
-        if remote_url(path) == url:
+    if _is_git_repo(path):
+        if _remote_url(path) == url:
             is_cloned = True
     return is_cloned
 
 def _clone(url, path):
     """clone from `self.url` to `self.path`"""
-    if not is_cloned(url, path):
+    if not _is_cloned(url, path):
         try:
             cmd, subcmd = ["git"], ["clone", f"{url}", f"{path}"]
             _git(path, cmd, subcmd)
@@ -78,15 +88,24 @@ def _clone(url, path):
     return True
 
 # === utilities
-def is_git_repo(path):
+def _is_git_repo(path):
     return Path(path, ".git").exists()
 
-def remote_url(path, name="origin"):
+def _remote_url(path, name="origin"):
     """get the URL for the remote `name`"""
     out = _git(path, subcmd=["remote", "get-url", name])
     return out.rstrip()
 
-def rand_string(n):
+def _rand_string(n):
+    """generate random alphanumeric string of length n"""
     choice_set = string.ascii_uppercase + string.ascii_lowercase + string.digits    
     res = ''.join(secrets.choice(choice_set) for i in range(n))
     return str(res)
+
+def _datetime2unix(date_time):
+    """convert datetime to UNIX timestamp"""
+    return time.mktime(date_time.timetuple())
+
+def _unix2datetime(unix_time):
+    """convert UNIX timestamp to datetime"""
+    return datetime.datetime.fromtimestamp(unix_time)
