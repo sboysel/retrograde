@@ -32,6 +32,7 @@ def test_repo_clone(test_repo_clone):
     with pytest.raises(Exception) as e:
         repo._clone()
 
+# @pytest.mark.skip()
 def test_repo_clone_nonempty_directory():
     """cloning into non-empty directories ought to throw an exception"""
     with TemporaryDirectory() as d:
@@ -43,6 +44,7 @@ def test_repo_clone_nonempty_directory():
             with pytest.raises(BaseException) as e:
                 repo._clone()
 
+# @pytest.mark.skip()
 def test_repo_clone_empty_directory():
     """cloning into empty directories should work"""
     repo = Repo(
@@ -53,6 +55,7 @@ def test_repo_clone_empty_directory():
         repo.path = d
         assert repo._clone()
 
+# @pytest.mark.skip()
 def test_repo_clone_bad_url():
     """raise an exception for bad URLs"""
     repo = Repo(
@@ -62,7 +65,7 @@ def test_repo_clone_bad_url():
     with pytest.raises(Exception) as e:
         repo._clone()
 
-
+# @pytest.mark.skip()
 def test_repo_is_cloned():
     repo = Repo(
         path = "demo",
@@ -76,15 +79,16 @@ def test_repo_is_cloned():
     # cleanup
     tmpdir.cleanup()
 
+# @pytest.mark.skip()
 def test_is_git_repo():
     assert not _is_git_repo("foo")
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_repo_current_branch(test_repo_clone):
     repo, _, _ = test_repo_clone
     assert repo._current_branch() == "main"
 
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_repo_checkout_branch(test_repo_clone):
     repo, _, _ = test_repo_clone
     starting_branch = repo._current_branch()

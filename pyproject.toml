@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "retrograde"
 dynamic = ["version"]
-description = ''
+description = 'Rewind git repositories'
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
