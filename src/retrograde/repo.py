@@ -55,10 +55,16 @@ class Repo:
         return out
     
     def _reset(self, commit) -> str:
+        """hard reset to commit"""
         out = _git(self.path, subcmd=["reset", "--hard", commit])
         return out
     
-    def _rebase(self, branch) -> str:
+    def _reset(self, commit):
+        out = _git(self.path, subcmd=["reset", "--hard", commit])
+        return out
+    
+    def _rebase(self, branch):
+        """rebase current branch from `branch`"""
         out = _git(self.path, subcmd=["rebase", "--quiet", branch])
         return out
         
@@ -74,6 +80,10 @@ def _git(path, cmd=None, subcmd=[None]) -> str:
 
 # === clone
 def _is_cloned(url: str, path: str):
+    """
+    Check if the path is a local clone of the repo.  Will return True if `path` is a
+    git repository and the URL for origin remote matches `url`.
+    """
     is_cloned = False
     if _is_git_repo(path):
         if _remote_url(path) == url:
