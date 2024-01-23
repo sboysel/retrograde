@@ -8,6 +8,7 @@ import subprocess
 import time
 from pathlib import Path
 
+
 # === Repo
 class Repo:
     """
@@ -16,34 +17,21 @@ class Repo:
         self.path = path
         self.url = url
 
-    def _git(self, subcmd: list) -> str:
+    # === core git
+    def git(self, subcmd: list) -> str:
         """run an arbitrary git subcommand on the repo located at `self.path`"""
         out = _git(self.path, subcmd=subcmd)
         return out
 
-    def _clone(self) -> bool:
+    # === clone
+    def clone(self) -> bool:
         """clone from `self.url` to `self.path`"""
         return _clone(self.url, self.path)
 
-    def _current_branch(self) -> str:
-        """run `git branch --current-branch`"""
-        branch = _git(self.path, subcmd=["branch", "--show-current"]).rstrip()
-        return branch
-
-    def _checkout_branch(self, branch: str) -> str:
-        """run `git checkout [branch]`"""
-        _ = _git(self.path, subcmd=["checkout", "--quiet", branch])
-        return branch
-    
-    def _temp_branch(self) -> str:
-        """run `git checkout -b [branch]`"""
-        branch = "retrograde" + _rand_string(10)
-        _ = _git(self.path, subcmd=["checkout", "--quiet", "-b", branch])
-        return branch
-
-    def _log(self, formats=("%h", "%at")) -> list:
+    # === revision history
+    def log(self, formats=("%h", "%at")) -> list:
         """return the git log as a list of tuples. each tuple is an element from
-           the tuple `formats`. The default is `formats = ('%h', '%at')`. See 
+           the tuple `formats`. The default is `formats = ('%h', '%at')`. See
            https://git-scm.com/docs/pretty-formats"""
         if isinstance(formats, tuple):
             formats = ",".join(formats)
@@ -51,23 +39,51 @@ class Repo:
             out = [tuple(x.split(",")) for x in out.splitlines()]
         else:
             out = _git(self.path, subcmd=["log", f"--format={formats}"])
-            out = out.splitlines()        
+            out = out.splitlines()
         return out
-    
-    def _reset(self, commit) -> str:
+
+    # === branches
+    def list_branches(self) -> str:
+        """run `git branch --format=%(refname:short)`"""
+        branches = _git(self.path, subcmd=["branch", "--format=%(refname:short)"])
+        return branches.splitlines()
+
+    def current_branch(self) -> str:
+        """run `git branch --current-branch`"""
+        branch = _git(self.path, subcmd=["branch", "--show-current"]).rstrip()
+        return branch
+
+    def checkout_branch(self, branch: str) -> str:
+        """run `git checkout [branch]`"""
+        _ = _git(self.path, subcmd=["checkout", "--quiet", branch])
+        return branch
+
+    def temp_branch(self) -> str:
+        """run `git checkout -b [branch]`"""
+        branch = "retrograde" + _rand_string(10)
+        _ = _git(self.path, subcmd=["checkout", "--quiet", "-b", branch])
+        return branch
+
+    def delete_branch(self, branch) -> bool:
+        """run `git checkout -D [branch]`"""
+        try:
+            _ = _git(self.path, subcmd=["branch", "--quiet", "-D", branch])
+            return True
+        except BaseException as e:
+            raise e
+
+    # === reset
+    def reset(self, commit) -> str:
         """hard reset to commit"""
         out = _git(self.path, subcmd=["reset", "--hard", commit])
         return out
-    
-    def _reset(self, commit):
-        out = _git(self.path, subcmd=["reset", "--hard", commit])
-        return out
-    
-    def _rebase(self, branch):
+
+    # === rebase
+    def rebase(self, branch):
         """rebase current branch from `branch`"""
         out = _git(self.path, subcmd=["rebase", "--quiet", branch])
         return out
-        
+
 
 # === core git binding
 def _git(path, cmd=None, subcmd=[None]) -> str:
@@ -111,7 +127,7 @@ def _remote_url(path: string, name="origin") -> str:
 
 def _rand_string(n: int) -> str:
     """generate random alphanumeric string of length n"""
-    choice_set = string.ascii_uppercase + string.ascii_lowercase + string.digits    
+    choice_set = string.ascii_uppercase + string.ascii_lowercase + string.digits
     res = ''.join(secrets.choice(choice_set) for i in range(n))
     return str(res)
 

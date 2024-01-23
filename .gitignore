@@ -4,3 +4,4 @@ demo
 src/retrograde/__pycache__
 .vscode
 .coverage*
+.DS_Store
