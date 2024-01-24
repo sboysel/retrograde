@@ -65,7 +65,8 @@ class Repo:
         return _clone(self.url, self.path)
     
     def remote_url(self, remote="origin") -> str:
-        """returns the URL for the remote named `remote`. Therefore not necessarily identical to `self.url`."""
+        """returns the URL for the remote named `remote`. Therefore not 
+           necessarily identical to `self.url`."""
         return _remote_url(self.path, remote=remote)
 
     # === log
@@ -82,6 +83,18 @@ class Repo:
             out = out.splitlines()
         return out
     
+    def latest_commit_since(self, timestamp) -> str:
+        """
+        Return the commit hash of the most recent commit *before* `timestamp`.
+        `timestamp` needs to be some timestamp format recognized by git. See
+        https://git-scm.com/docs/git-log
+        """
+        out = _git(
+            self.path, 
+            subcmd=["log", "-1", f"--before={timestamp}", "--format=%h"]
+        ).rstrip()
+        return out
+
     def latest_commit(self) -> tuple:
         """returns most recent hash and UNIX timestamp of most recent commit"""
         # TODO more efficient to call `git log -1 ...`?
@@ -91,11 +104,26 @@ class Repo:
         """returns most recent hash and UNIX timestamp of earliest commit"""
         # TODO more efficient to call `git log --reverse -1 ...`?
         return self.log()[-1]
+    
+    def is_history_linear(self) -> bool:
+        """
+        """
+        begin = self.latest_commit()
+        end = self.earliest_commit()
+        commits_with_multiple_parents = _git(
+            self.path, 
+            subcmd=["rev-list", "--count", "--min-parents", f"{begin}..{end}"]
+        ).rstrip()
+        commits_with_multiple_parents = int(commits_with_multiple_parents)
+        return commits_with_multiple_parents > 0
 
     # === branches
     def list_branches(self) -> str:
         """run `git branch --format=%(refname:short)`"""
-        branches = _git(self.path, subcmd=["branch", "--format=%(refname:short)"])
+        branches = _git(
+            self.path,
+            subcmd=["branch", "--format=%(refname:short)"]
+        )
         return branches.splitlines()
 
     def current_branch(self) -> str:
@@ -135,11 +163,17 @@ class Repo:
         return out
     
     # === utils
-    def _log_from_timestamps(self, timestamps):
-        """For a list of timestamps, return a set of commits reflecting the project state.
+    def extract_commits_from_timestamps(self, timestamps):
+        """For a list of timestamps, return a set of commits reflecting the 
+           project state.
         
-        timestamps = [1, 5, 10]
-        log        = [(hash1, )]
+        For example,
+
+        timestamps = [ 1           3, 4,          8,          10]
+        log        = [  (hash1, 2),    (hash2, 6), (hash3, 9)]
+
+        would return [(None, 1), (hash1, 3), (hash1, 3), (hash3, 8)]
+
         """
         # convert datetime inputs to UNIX timestamps
         unix_timestamps = [_datetime2unix(x) for x in timestamps]
@@ -147,11 +181,12 @@ class Repo:
         # for each timestamp, get the most recent commit at that point in time
         log = []
         for t in unix_timestamps:
-            out = _git(self.path, subcmd=["log", "--reverse", f"--after={t}", "--format=%h"]).splitlines()
-            c = out[0]
-            log.append((c, t))
+            commit = self.latest_commit_since(timestamp=t)
+            if commit == "":
+                commit = None
+            log.append((commit, t))
 
-        log = list(set(log))
+        # note: there may be duplicate commits in log
         return log
 
 
@@ -172,7 +207,8 @@ def retrograde(repo: Repo):
 def _git(path, cmd=None, subcmd=[None]) -> str:
     """exectue git and subcommand at `path`"""
     if not cmd:
-        cmd = ["git", "--no-pager", f"--git-dir={path}/.git", f"--work-tree={path}"]
+        cmd = ["git", "--no-pager", f"--git-dir={path}/.git", 
+               f"--work-tree={path}"]
     cmd.extend(subcmd)
     try:
         out = subprocess.check_output(cmd, text=True, encoding="utf-8")
@@ -232,6 +268,12 @@ if __name__ == "__main__":
         repo = Repo(path = str(d), url = ".")
         repo.clone()
 
-        timestamps = [datetime.datetime(2023, 7, 10, 1, 1, 1)]
+        timestamps = [
+            datetime.datetime(2024, 1, 1, 1, 1, 1),
+            datetime.datetime(2024, 1, 20, 1, 1, 1),
+            datetime.datetime(2024, 1, 21, 1, 1, 1),
+            datetime.datetime(2024, 1, 22, 1, 1, 1),
+            datetime.datetime(2024, 1, 24, 1, 1, 1)
+        ]
         print(timestamps)
-        print(repo._log_from_timestamps(timestamps))
+        print(repo.extract_commits_from_timestamps(timestamps))
