@@ -11,11 +11,10 @@ Usage:
 
     # Define repo and commits to traverse over        
     repo = Repo(path, url)
-    commits = repo.log()
 
-    # Safely traverse over commits
+    # Safely traverse over all commits
     with retrograde(repo) as r:
-        for c, t in commits:
+        for commit, timestamp in r.log():
             r.reset(commit)
             r.measure()
 
@@ -134,6 +133,26 @@ class Repo:
         """rebase current branch from `branch`"""
         out = _git(self.path, subcmd=["rebase", "--quiet", branch])
         return out
+    
+    # === utils
+    def _log_from_timestamps(self, timestamps):
+        """For a list of timestamps, return a set of commits reflecting the project state.
+        
+        timestamps = [1, 5, 10]
+        log        = [(hash1, )]
+        """
+        # convert datetime inputs to UNIX timestamps
+        unix_timestamps = [_datetime2unix(x) for x in timestamps]
+        
+        # for each timestamp, get the most recent commit at that point in time
+        log = []
+        for t in unix_timestamps:
+            out = _git(self.path, subcmd=["log", "--reverse", f"--after={t}", "--format=%h"]).splitlines()
+            c = out[0]
+            log.append((c, t))
+
+        log = list(set(log))
+        return log
 
 
 @contextmanager
@@ -212,4 +231,7 @@ if __name__ == "__main__":
     with TemporaryDirectory() as d:
         repo = Repo(path = str(d), url = ".")
         repo.clone()
-        print(repo.rev_list())
+
+        timestamps = [datetime.datetime(2023, 7, 10, 1, 1, 1)]
+        print(timestamps)
+        print(repo._log_from_timestamps(timestamps))
