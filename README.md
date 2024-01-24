@@ -38,7 +38,7 @@ pip install git+https://github.com/sboysel/retrograde.git
 
 ## Usage
 
-```console
+```python
 import retrograde
 
 # Extend Repo class with your own methods
