@@ -4,7 +4,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/retrograde.svg)](https://pypi.org/project/retrograde)
 
 `retrograde` automates the process of rewinding a git repository and observing 
-its development history. The typical workflow is the clone a repository, 
+its development history. In a typical workflow, `retrograde` will clone a repository, 
 checkout a temporary branch, and iteratively roll back the repository's state to
 earlier commits. This allows you to characterize the state the repository over 
 its evolution at a high level of temporal granularity. In addition to this core
@@ -18,6 +18,7 @@ a demonstration.
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [See Also](#see-also)
 - [License](#license)
 
 ## Dependencies
@@ -58,6 +59,12 @@ with retrograde.retrograde(repo) as r:
         r.reset(commit)
         results.append((timestamp, commit, r.n_files()))
 ```
+
+## See Also
+
+- [ishepard/pydriller](https://github.com/ishepard/pydriller)
+- [src-d/hercules](https://github.com/src-d/hercules) and `labours`
+- [erikbern/git-of-theseus](https://github.com/erikbern/git-of-theseus)
 
 ## License
 
