@@ -6,12 +6,32 @@ import secrets
 import string
 import subprocess
 import time
+from contextlib import contextmanager
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 
 # === Repo
 class Repo:
     """
+    Repo
+
+    path: str
+    url:  str
+
+    demo usage:
+    ```
+    class MyRepo(Repo):
+        def measure(self):
+            ...
+    
+    repo = Repo(path, url)
+    c = [ ... ]
+    with retrograde(repo) as r:
+        for c in commits:
+            r.reset(commit)
+            r.measure()
+    ```
     """
     def __init__(self, path: str, url: str):
         self.path = path
@@ -27,8 +47,12 @@ class Repo:
     def clone(self) -> bool:
         """clone from `self.url` to `self.path`"""
         return _clone(self.url, self.path)
+    
+    def remote_url(self, remote="origin") -> str:
+        """returns the URL for the remote named `remote`."""
+        return _remote_url(self.path, remote=remote)
 
-    # === revision history
+    # === log
     def log(self, formats=("%h", "%at")) -> list:
         """return the git log as a list of tuples. each tuple is an element from
            the tuple `formats`. The default is `formats = ('%h', '%at')`. See
@@ -41,6 +65,20 @@ class Repo:
             out = _git(self.path, subcmd=["log", f"--format={formats}"])
             out = out.splitlines()
         return out
+    
+    def latest_commit(self) -> tuple:
+        """
+        """
+        # TODO more efficient to call `git log -1 ...`?
+        latest = self.log()[0]
+        return latest
+    
+    def earliest_commit(self) -> tuple:
+        """
+        """
+        # TODO more efficient to call `git log --reverse -1 ...`?
+        earliest = self.log()[-1]
+        return earliest
 
     # === branches
     def list_branches(self) -> str:
@@ -85,6 +123,21 @@ class Repo:
         return out
 
 
+@contextmanager
+def retrograde(repo: Repo):
+    """
+
+    """
+    try:
+        repo.clone()
+        orig_branch = repo.current_branch()
+        temp_branch = repo.temp_branch()
+        yield repo
+    finally:
+        repo.checkout_branch(branch=orig_branch)
+        repo.delete_branch(branch=temp_branch)
+        
+
 # === core git binding
 def _git(path, cmd=None, subcmd=[None]) -> str:
     """exectue git and subcommand at `path`"""
@@ -120,9 +173,9 @@ def _clone(url: str, path: str) -> bool:
 def _is_git_repo(path: str) -> str:
     return Path(path, ".git").exists()
 
-def _remote_url(path: string, name="origin") -> str:
-    """get the URL for the remote `name`"""
-    out = _git(path, subcmd=["remote", "get-url", name])
+def _remote_url(path: string, remote="origin") -> str:
+    """get the URL for the remote named `remote`"""
+    out = _git(path, subcmd=["remote", "get-url", remote])
     return out.rstrip()
 
 def _rand_string(n: int) -> str:
@@ -138,3 +191,10 @@ def _datetime2unix(date_time: datetime.datetime) -> int:
 def _unix2datetime(unix_time: int) -> datetime.datetime:
     """convert UNIX timestamp to datetime"""
     return datetime.datetime.fromtimestamp(unix_time)
+
+
+if __name__ == "__main__":
+    with TemporaryDirectory() as d:
+        repo = Repo(path = str(d), url = ".")
+        repo.clone()
+        print(repo.rev_list())

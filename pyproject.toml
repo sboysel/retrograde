@@ -40,6 +40,7 @@ dependencies = [
   "pytest",
 ]
 [tool.hatch.envs.default.scripts]
+main = "python src/retrograde/repo.py"
 test = "pytest -s {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
 cov-report = [
