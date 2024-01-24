@@ -88,17 +88,6 @@ def test_main_workflow_context_manager_stdlib(test_repo):
     assert commits == repo.log()
     assert orig_branch == repo.current_branch()
 
-def test_main_workflow_context_manager_class_based(test_repo):
-    url = URL
-    path = TemporaryDirectory()
-    with Repo(str(path), url) as repo:
-        commits = repo.log()
-        assert commits == test_repo.log()
-        for commit, _ in commits:
-            repo.reset(commit)
-    # cleanup
-    path.cleanup()
-
 # === checkout
 def test_repo_checkout_branch(test_repo):
     repo = test_repo

@@ -1,22 +1,32 @@
 """<one line description>
 
-<main description>
+This module implements the class `Repo` and the core functionality of retrograde.
+The `Repo` class represents a git repository and exposes methods that execute git
+operations on that respository. The main workflow of retrograde is to clone a 
+repository, checkout a temporary branch, and sequentially reset the repsitory to
+earlier commits contained in its history. This allows you to characterize the state
+the repository over its evolution at a high level of temporal granularity.
 
 Usage:
 
+    import retrograde
+
     # Extend Repo class with your own methods
-    class MyRepo(Repo):
-        def measure(self):
-            print("Function based on current repo state")
+    class ExtendedRepo(retrograde.repo.Repo):
+        def n_files(self):
+            files = self.git(["ls-files"]).splitlines()
+            return len(files)
+
 
     # Define repo and commits to traverse over        
-    repo = Repo(path, url)
+    repo = ExtendedRepo(path, url)
 
     # Safely traverse over *all* commits
-    with retrograde(repo) as r:
+    results = []
+    with retrograde.retrograde(repo) as r:
         for commit, timestamp in r.log():
             r.reset(commit)
-            r.measure()
+            results.append((timestamp, commit, r.n_files()))
 
             
 SPDX-FileCopyrightText: 2024-present Sam Boysel <sboysel@gmail.com>
@@ -55,26 +65,6 @@ class Repo:
         self.url = url
         self._orig_branch = None
         self._temp_branch = None
-
-    # === context management
-    def __enter__(self):
-        print("Cloning...")
-        print(f"=> source: {self.url}")
-        print(f"=> destination: {self.path}")
-        self.clone()
-        print("Creating temporary branch...")
-        self._orig_branch = self.current_branch()
-        print(f"=> original: {self._orig_branch}")
-        self._temp_branch = self.temp_branch()
-        print(f"=> temporary: {self._orig_branch}")
-        return self
-    
-    def __exit__(self, exc_type, exc_value, tb):
-        if exc_type is not None:
-            traceback.print_exception(exc_type, exc_value, tb)
-        print("Cleaning up...")
-        self.checkout_branch(branch=self._orig_branch)
-        self.delete_branch(branch=self._temp_branch)
 
     # === core git
     def git(self, subcmd: list) -> str:
