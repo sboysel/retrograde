@@ -1,11 +1,16 @@
-"""<one line description>
+"""Repo class and associated git methods
 
 This module implements the class `Repo` and the core functionality of retrograde.
 The `Repo` class represents a git repository and exposes methods that execute git
-operations on that respository. The main workflow of retrograde is to clone a 
-repository, checkout a temporary branch, and sequentially reset the repsitory to
-earlier commits contained in its history. This allows you to characterize the state
-the repository over its evolution at a high level of temporal granularity.
+operations on that respository.
+
+`retrograde` automates the process of rewinding a git repository and observing 
+its development history. In a typical workflow, `retrograde` will clone a repository, 
+checkout a temporary branch, and iteratively roll back the repository's state to
+earlier commits. This allows you to characterize the state the repository over 
+its evolution at a high level of temporal granularity. In addition to this core
+functionality, `retrograde` aims to be flexible and extensible by allowing
+researchers to integrate their own metrics.
 
 Usage:
 
