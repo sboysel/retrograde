@@ -1,6 +1,29 @@
-# SPDX-FileCopyrightText: 2024-present Sam Boysel <sboysel@gmail.com>
-#
-# SPDX-License-Identifier: MIT
+"""<one line description>
+
+<main description>
+
+Usage:
+
+    # Extend Repo class with your own methods
+    class MyRepo(Repo):
+        def measure(self):
+            print("Function based on current repo state")
+
+    # Define repo and commits to traverse over        
+    repo = Repo(path, url)
+    commits = repo.log()
+
+    # Safely traverse over commits
+    with retrograde(repo) as r:
+        for c, t in commits:
+            r.reset(commit)
+            r.measure()
+
+            
+SPDX-FileCopyrightText: 2024-present Sam Boysel <sboysel@gmail.com>
+
+SPDX-License-Identifier: MIT
+"""
 import datetime
 import secrets
 import string
@@ -13,27 +36,21 @@ from tempfile import TemporaryDirectory
 
 # === Repo
 class Repo:
-    """
-    Repo
+    """<one line class description>
 
-    path: str
-    url:  str
+    <main class description>
 
-    demo usage:
-    ```
-    class MyRepo(Repo):
-        def measure(self):
-            ...
-    
-    repo = Repo(path, url)
-    c = [ ... ]
-    with retrograde(repo) as r:
-        for c in commits:
-            r.reset(commit)
-            r.measure()
-    ```
+    Attributes:
+        path: path to local repository.
+        url:  remote URL of the repository.
     """
     def __init__(self, path: str, url: str):
+        """Initialize Repo object
+
+        Args:
+            path: path to local repository.
+            url:  remote URL of the repository.
+        """
         self.path = path
         self.url = url
 
@@ -49,7 +66,7 @@ class Repo:
         return _clone(self.url, self.path)
     
     def remote_url(self, remote="origin") -> str:
-        """returns the URL for the remote named `remote`."""
+        """returns the URL for the remote named `remote`. Therefore not necessarily identical to `self.url`."""
         return _remote_url(self.path, remote=remote)
 
     # === log
@@ -67,14 +84,12 @@ class Repo:
         return out
     
     def latest_commit(self) -> tuple:
-        """
-        """
+        """returns most recent hash and UNIX timestamp of most recent commit"""
         # TODO more efficient to call `git log -1 ...`?
         return self.log()[0]
     
     def earliest_commit(self) -> tuple:
-        """
-        """
+        """returns most recent hash and UNIX timestamp of earliest commit"""
         # TODO more efficient to call `git log --reverse -1 ...`?
         return self.log()[-1]
 
@@ -123,9 +138,7 @@ class Repo:
 
 @contextmanager
 def retrograde(repo: Repo):
-    """
-    Safely run retrograde operations in temporary branch
-    """
+    """Safely run retrograde operations in temporary branch"""
     repo.clone()
     orig_branch = repo.current_branch()
     temp_branch = repo.temp_branch()
