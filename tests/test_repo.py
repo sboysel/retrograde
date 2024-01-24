@@ -18,8 +18,8 @@ from retrograde.repo import (
 )
 
 URL = "https://github.com/sboysel/awesome-oss-research-data"
-PATH = TemporaryDirectory()
-# PATH = Path("/tmp", "awesome-oss-research-data")
+# PATH = TemporaryDirectory()
+PATH = Path("/tmp", "awesome-oss-research-data")
 
 @pytest.fixture(scope="session", autouse=True)
 def test_repo():
@@ -77,7 +77,7 @@ def test_main_workflow(test_repo):
     repo.checkout_branch(orig_branch)
     assert log == repo.log()
 
-def test_main_workflow_context_manager(test_repo):
+def test_main_workflow_context_manager_stdlib(test_repo):
     repo = test_repo
     orig_branch = repo.current_branch()
     commits = repo.log()
@@ -87,6 +87,17 @@ def test_main_workflow_context_manager(test_repo):
     # verify
     assert commits == repo.log()
     assert orig_branch == repo.current_branch()
+
+def test_main_workflow_context_manager_class_based(test_repo):
+    url = URL
+    path = TemporaryDirectory()
+    with Repo(str(path), url) as repo:
+        commits = repo.log()
+        assert commits == test_repo.log()
+        for commit, _ in commits:
+            repo.reset(commit)
+    # cleanup
+    path.cleanup()
 
 # === checkout
 def test_repo_checkout_branch(test_repo):

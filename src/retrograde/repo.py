@@ -12,7 +12,7 @@ Usage:
     # Define repo and commits to traverse over        
     repo = Repo(path, url)
 
-    # Safely traverse over all commits
+    # Safely traverse over *all* commits
     with retrograde(repo) as r:
         for commit, timestamp in r.log():
             r.reset(commit)
@@ -28,6 +28,7 @@ import secrets
 import string
 import subprocess
 import time
+import traceback
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -52,6 +53,28 @@ class Repo:
         """
         self.path = path
         self.url = url
+        self._orig_branch = None
+        self._temp_branch = None
+
+    # === context management
+    def __enter__(self):
+        print("Cloning...")
+        print(f"=> source: {self.url}")
+        print(f"=> destination: {self.path}")
+        self.clone()
+        print("Creating temporary branch...")
+        self._orig_branch = self.current_branch()
+        print(f"=> original: {self._orig_branch}")
+        self._temp_branch = self.temp_branch()
+        print(f"=> temporary: {self._orig_branch}")
+        return self
+    
+    def __exit__(self, exc_type, exc_value, tb):
+        if exc_type is not None:
+            traceback.print_exception(exc_type, exc_value, tb)
+        print("Cleaning up...")
+        self.checkout_branch(branch=self._orig_branch)
+        self.delete_branch(branch=self._temp_branch)
 
     # === core git
     def git(self, subcmd: list) -> str:
