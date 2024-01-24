@@ -70,15 +70,13 @@ class Repo:
         """
         """
         # TODO more efficient to call `git log -1 ...`?
-        latest = self.log()[0]
-        return latest
+        return self.log()[0]
     
     def earliest_commit(self) -> tuple:
         """
         """
         # TODO more efficient to call `git log --reverse -1 ...`?
-        earliest = self.log()[-1]
-        return earliest
+        return self.log()[-1]
 
     # === branches
     def list_branches(self) -> str:
@@ -126,12 +124,12 @@ class Repo:
 @contextmanager
 def retrograde(repo: Repo):
     """
-
+    Safely run retrograde operations in temporary branch
     """
+    repo.clone()
+    orig_branch = repo.current_branch()
+    temp_branch = repo.temp_branch()
     try:
-        repo.clone()
-        orig_branch = repo.current_branch()
-        temp_branch = repo.temp_branch()
         yield repo
     finally:
         repo.checkout_branch(branch=orig_branch)
@@ -144,8 +142,12 @@ def _git(path, cmd=None, subcmd=[None]) -> str:
     if not cmd:
         cmd = ["git", "--no-pager", f"--git-dir={path}/.git", f"--work-tree={path}"]
     cmd.extend(subcmd)
-    out = subprocess.check_output(cmd, text=True, encoding="utf-8")
-    return out
+    try:
+        out = subprocess.check_output(cmd, text=True, encoding="utf-8")
+        return out
+    except subprocess.CalledProcessError as e:
+        print("git subprocess error : ", e.returncode, e.output)
+        raise
 
 # === clone
 def _is_cloned(url: str, path: str):
@@ -181,7 +183,7 @@ def _remote_url(path: string, remote="origin") -> str:
 def _rand_string(n: int) -> str:
     """generate random alphanumeric string of length n"""
     choice_set = string.ascii_uppercase + string.ascii_lowercase + string.digits
-    res = ''.join(secrets.choice(choice_set) for i in range(n))
+    res = "".join(secrets.choice(choice_set) for i in range(n))
     return str(res)
 
 def _datetime2unix(date_time: datetime.datetime) -> int:

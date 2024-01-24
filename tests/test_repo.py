@@ -2,12 +2,20 @@
 #
 # SPDX-License-Identifier: MIT
 import datetime
+import subprocess
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 import pytest
 
-from retrograde.repo import Repo, _datetime2unix, _is_git_repo, _rand_string, _unix2datetime
+from retrograde.repo import (
+    Repo,
+    retrograde,
+    _datetime2unix,
+    _is_git_repo,
+    _rand_string,
+    _unix2datetime
+)
 
 URL = "https://github.com/sboysel/awesome-oss-research-data"
 PATH = TemporaryDirectory()
@@ -35,8 +43,10 @@ def test_repo_clone_bad_url(test_repo):
     """raise an exception for bad URLs"""
     repo = test_repo
     repo.url = "bad url"
-    with pytest.raises(Exception) as e:
+    with pytest.raises(subprocess.CalledProcessError) as e:
         repo.clone()
+    # reset test repo object
+    repo.url = URL
 
 def test_repo_clone_nonempty_directory():
     """cloning into non-empty directories ought to throw an exception"""
@@ -67,6 +77,17 @@ def test_main_workflow(test_repo):
     repo.checkout_branch(orig_branch)
     assert log == repo.log()
 
+def test_main_workflow_context_manager(test_repo):
+    repo = test_repo
+    orig_branch = repo.current_branch()
+    commits = repo.log()
+    with retrograde(repo) as r:
+        for commit, _ in commits:
+            repo.reset(commit)
+    # verify
+    assert commits == repo.log()
+    assert orig_branch == repo.current_branch()
+
 # === checkout
 def test_repo_checkout_branch(test_repo):
     repo = test_repo
@@ -74,7 +95,7 @@ def test_repo_checkout_branch(test_repo):
     branches = repo.list_branches()
     assert starting_branch in branches
     # errors when checking out non-existant branchs
-    with pytest.raises(BaseException) as e:
+    with pytest.raises(subprocess.CalledProcessError) as e:
         repo.checkout_branch(_rand_string(10))
     # temp branches
     temp_branch = repo.temp_branch()
