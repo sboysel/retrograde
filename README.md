@@ -1,7 +1,11 @@
 # retrograde
 
-[![PyPI - Version](https://img.shields.io/pypi/v/retrograde.svg)](https://pypi.org/project/retrograde)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/retrograde.svg)](https://pypi.org/project/retrograde)
+<!--- [![PyPI - Version](https://img.shields.io/pypi/v/retrograde.svg)](https://pypi.org/project/retrograde)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/retrograde.svg)](https://pypi.org/project/retrograde) --->
+
+[![version](https://img.shields.io/badge/version-0.0.1-blue)](#)
+[![license](https://img.shields.io/badge/license-MIT-blue)](https://spdx.org/licenses/MIT.html)
+[![python](https://img.shields.io/badge/python-3.8+-green)](#)
 
 Rewind a git repository through its development history.
 
