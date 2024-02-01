@@ -41,6 +41,9 @@ import retrograde
 # Extend the base Repo class with your own methods
 class ExtendedRepo(retrograde.repo.Repo):
     def n_files(self):
+        """
+        Count the number of files tracked in the codebase.
+        """
         files = self.git(["ls-files"]).splitlines()
         return len(files)
 
@@ -48,11 +51,10 @@ class ExtendedRepo(retrograde.repo.Repo):
 tmp = tempfile.TemporaryDirectory()
 repo = ExtendedRepo(tmp, "https://github.com/sboysel/retrograde")
 
-# count the number of files in the codebase at each commit
-results = []
 
 # retrograde clones and rewinds the repository's state in reverse 
 # chronological roder.
+results = []
 with retrograde.retrograde(repo) as r:
     for commit, timestamp in r.log():
         r.reset(commit)
@@ -73,4 +75,6 @@ with retrograde.retrograde(repo) as r:
 
 ## License
 
-`retrograde` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+[MIT License](https://spdx.org/licenses/MIT.html)
+
+Copyright (c) 2024-present Sam Boysel <sboysel@gmail.com>
